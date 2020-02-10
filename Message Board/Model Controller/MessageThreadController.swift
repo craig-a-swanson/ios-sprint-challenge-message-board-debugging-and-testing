@@ -11,6 +11,7 @@ import Foundation
 class MessageThreadController {
     
     // MARK: - Properties
+    // FIXED: Removed static let
     let baseURL = URL(string: "https://kidsfly-43b49.firebaseio.com/")!
     var messageThreads: [MessageThread] = []
     
@@ -46,6 +47,8 @@ class MessageThreadController {
             }
             
             completion()
+            
+            // FIXED: added .resume() command
         }.resume()
     }
     
