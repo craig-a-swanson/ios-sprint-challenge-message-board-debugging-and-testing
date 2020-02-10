@@ -11,10 +11,10 @@ import Foundation
 class MessageThread: Codable, Equatable {
 
     let title: String
-    var messages: [Message]
+    var messages: [MessageThread.Message]
     let identifier: String
 
-    init(title: String, messages: [Message] = [], identifier: String = UUID().uuidString) {
+    init(title: String, messages: [MessageThread.Message] = [], identifier: String = UUID().uuidString) {
         self.title = title
         self.messages = messages
         self.identifier = identifier
@@ -37,11 +37,13 @@ class MessageThread: Codable, Equatable {
         
         let title = try container.decode(String.self, forKey: .title)
         let identifier = try container.decode(String.self, forKey: .identifier)
+        
 //        let messagesKeyedContainer = try container.nestedContainer(keyedBy: CodingKeys.MessageKeys.self, forKey: .messages)
-//        var messagesUnkeyedContainer = try container.nestedUnkeyedContainer(forKey: .messages)
-//        var messageList: [Message] = []
-//        while !messagesUnkeyedContainer.isAtEnd {
-//        let messagesContainer = try messagesUnkeyedContainer.nestedContainer(keyedBy: CodingKeys.MessageKeys.self)
+//
+//
+//        var messageList: [MessageThread.Message] = []
+//        for key in messagesKeyedContainer.allKeys {
+//            let messagesContainer = try messagesKeyedContainer.nestedContainer(keyedBy: CodingKeys.MessageKeys.self, forKey: key)
 //        let text = try messagesContainer.decode(String.self, forKey: .text)
 //        let sender = try messagesContainer.decode(String.self, forKey: .sender)
 //        let timestamp = try messagesContainer.decode(Date.self, forKey: .timestamp)
@@ -50,8 +52,13 @@ class MessageThread: Codable, Equatable {
 //            messageList.append(newMessage)
 //        }
 //        self.messages = messageList
-        let messages = try container.decodeIfPresent([Message].self, forKey: .messages)
-        self.messages = messages ?? []
+
+        
+        
+//        // ORIGINAL
+        // FIXED: Changed data type to a dictionary of type [String:Message], then for our model we pull out just the values of the dictionary.
+        let messages = try container.decodeIfPresent([String : Message].self, forKey: .messages) ?? [:]
+        self.messages = Array(messages.values)
         self.title = title
         self.identifier = identifier
     }

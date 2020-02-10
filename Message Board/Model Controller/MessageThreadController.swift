@@ -41,10 +41,12 @@ class MessageThreadController {
                 completion(); return }
             
             do {
-                let messages = try JSONDecoder().decode([MessageThread].self, from: data)
+                
+                // FIXED: changed decoding format into a dictionary and then pulled out the values (MessageThreads)
+                let messages = try JSONDecoder().decode([String : MessageThread].self, from: data).map() { $0.value }
                 self.messageThreads = messages
             } catch {
-//                self.messageThreads = []
+                self.messageThreads = []
                 NSLog("Error decoding message threads from JSON data: \(error)")
             }
             
@@ -73,6 +75,9 @@ class MessageThreadController {
             request.httpBody = try JSONEncoder().encode(thread)
         } catch {
             NSLog("Error encoding thread to JSON: \(error)")
+            
+            // FIXED: add return
+            return
         }
         
         URLSession.shared.dataTask(with: request) { (data, _, error) in
