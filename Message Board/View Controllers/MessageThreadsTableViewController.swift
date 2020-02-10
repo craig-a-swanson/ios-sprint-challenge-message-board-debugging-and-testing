@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MessageThreadsTableViewController: UITableViewController {
+class MessageThreadsTableViewController: UITableViewController, UITextFieldDelegate {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
