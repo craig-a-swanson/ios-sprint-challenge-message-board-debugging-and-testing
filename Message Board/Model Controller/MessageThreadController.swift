@@ -40,9 +40,10 @@ class MessageThreadController {
                 completion(); return }
             
             do {
-                self.messageThreads = try JSONDecoder().decode([MessageThread].self, from: data)
+                let messages = try JSONDecoder().decode([MessageThread].self, from: data)
+                self.messageThreads = messages
             } catch {
-                self.messageThreads = []
+//                self.messageThreads = []
                 NSLog("Error decoding message threads from JSON data: \(error)")
             }
             
@@ -52,6 +53,7 @@ class MessageThreadController {
         }.resume()
     }
     
+    // MARK: - Create Message Thread
     func createMessageThread(with title: String, completion: @escaping () -> Void) {
         
         // This if statement and the code inside it is used for UI Testing. Disregard this when debugging.
@@ -86,6 +88,7 @@ class MessageThreadController {
         }.resume()
     }
     
+    // MARK: - New Message in Thread
     func createMessage(in messageThread: MessageThread, withText text: String, sender: String, completion: @escaping () -> Void) {
         
         // This if statement and the code inside it is used for UI Testing. Disregard this when debugging.

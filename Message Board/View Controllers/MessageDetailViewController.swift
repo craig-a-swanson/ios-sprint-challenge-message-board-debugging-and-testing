@@ -19,7 +19,6 @@ class MessageDetailViewController: UIViewController {
             let messageThread = messageThread else { return }
         
         messageThreadController?.createMessage(in: messageThread, withText: messageText, sender: senderName, completion: {
-            print("Message created!")
             
             // FIXED:  popped view controller after creating message.
             DispatchQueue.main.async {

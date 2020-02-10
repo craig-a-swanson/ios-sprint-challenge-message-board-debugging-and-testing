@@ -11,10 +11,10 @@ import Foundation
 class MessageThread: Codable, Equatable {
 
     let title: String
-    var messages: [MessageThread.Message]
+    var messages: [Message]
     let identifier: String
 
-    init(title: String, messages: [MessageThread.Message] = [], identifier: String = UUID().uuidString) {
+    init(title: String, messages: [Message] = [], identifier: String = UUID().uuidString) {
         self.title = title
         self.messages = messages
         self.identifier = identifier
@@ -37,15 +37,23 @@ class MessageThread: Codable, Equatable {
         
         let title = try container.decode(String.self, forKey: .title)
         let identifier = try container.decode(String.self, forKey: .identifier)
-        let messagesContainer = try container.nestedContainer(keyedBy: CodingKeys.MessageKeys.self, forKey: .messages)
-        let text = try messagesContainer.decode(String.self, forKey: .text)
-        let sender = try messagesContainer.decode(String.self, forKey: .sender)
-        let timestamp = try messagesContainer.decode(Date.self, forKey: .timestamp)
-//        let messages = try messagesContainer.decode([Message].self, forKey: .messages) //?? []
-        
+//        let messagesKeyedContainer = try container.nestedContainer(keyedBy: CodingKeys.MessageKeys.self, forKey: .messages)
+//        var messagesUnkeyedContainer = try container.nestedUnkeyedContainer(forKey: .messages)
+//        var messageList: [Message] = []
+//        while !messagesUnkeyedContainer.isAtEnd {
+//        let messagesContainer = try messagesUnkeyedContainer.nestedContainer(keyedBy: CodingKeys.MessageKeys.self)
+//        let text = try messagesContainer.decode(String.self, forKey: .text)
+//        let sender = try messagesContainer.decode(String.self, forKey: .sender)
+//        let timestamp = try messagesContainer.decode(Date.self, forKey: .timestamp)
+//
+//            let newMessage = Message(text: text, sender: sender, timestamp: timestamp)
+//            messageList.append(newMessage)
+//        }
+//        self.messages = messageList
+        let messages = try container.decodeIfPresent([Message].self, forKey: .messages)
+        self.messages = messages ?? []
         self.title = title
         self.identifier = identifier
-        self.messages = [Message(text: text, sender: sender, timestamp: timestamp)]
     }
 
     
