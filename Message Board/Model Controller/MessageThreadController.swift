@@ -10,9 +10,15 @@ import Foundation
 
 class MessageThreadController {
     
+    // MARK: - Properties
+    let baseURL = URL(string: "https://lambda-message-board.firebaseio.com/")!
+    var messageThreads: [MessageThread] = []
+    
+    
+    // MARK: - Fetch from Server
     func fetchMessageThreads(completion: @escaping () -> Void) {
         
-        let requestURL = MessageThreadController.baseURL.appendingPathExtension("json")
+        let requestURL = baseURL.appendingPathExtension("json")
         
         // This if statement and the code inside it is used for UI Testing. Disregard this when debugging.
         if isUITesting {
@@ -110,7 +116,5 @@ class MessageThreadController {
             
         }.resume()
     }
-    
-    static let baseURL = URL(string: "https://lambda-message-board.firebaseio.com/")!
-    var messageThreads: [MessageThread] = []
+
 }
