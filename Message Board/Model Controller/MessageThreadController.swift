@@ -11,7 +11,9 @@ import Foundation
 class MessageThreadController {
     
     // MARK: - Properties
-    let baseURL = URL(string: "https://lambda-message-board.firebaseio.com/")!
+
+    // FIXED: Removed static let
+    let baseURL = URL(string: "https://kidsfly-43b49.firebaseio.com/")!
     var messageThreads: [MessageThread] = []
     
     
@@ -34,19 +36,25 @@ class MessageThreadController {
                 return
             }
             
-            guard let data = data else { NSLog("No data returned from data task"); completion(); return }
+            guard let data = data else {
+                NSLog("No data returned from data task")
+                completion(); return }
             
             do {
-                self.messageThreads = try JSONDecoder().decode([MessageThread].self, from: data)
+                let messages = try JSONDecoder().decode([MessageThread].self, from: data)
+                self.messageThreads = messages
             } catch {
-                self.messageThreads = []
+//                self.messageThreads = []
                 NSLog("Error decoding message threads from JSON data: \(error)")
             }
             
             completion()
+            
+            // FIXED: added .resume() command
         }.resume()
     }
     
+    // MARK: - Create Message Thread
     func createMessageThread(with title: String, completion: @escaping () -> Void) {
         
         // This if statement and the code inside it is used for UI Testing. Disregard this when debugging.
@@ -57,7 +65,7 @@ class MessageThreadController {
         
         let thread = MessageThread(title: title)
         
-        let requestURL = MessageThreadController.baseURL.appendingPathComponent(thread.identifier).appendingPathExtension("json")
+        let requestURL = baseURL.appendingPathComponent(thread.identifier).appendingPathExtension("json")
         var request = URLRequest(url: requestURL)
         request.httpMethod = HTTPMethod.put.rawValue
         
@@ -78,9 +86,10 @@ class MessageThreadController {
             self.messageThreads.append(thread)
             completion()
             
-        }
+        }.resume()
     }
     
+    // MARK: - New Message in Thread
     func createMessage(in messageThread: MessageThread, withText text: String, sender: String, completion: @escaping () -> Void) {
         
         // This if statement and the code inside it is used for UI Testing. Disregard this when debugging.
@@ -94,7 +103,7 @@ class MessageThreadController {
         let message = MessageThread.Message(text: text, sender: sender)
         messageThreads[index].messages.append(message)
         
-        let requestURL = MessageThreadController.baseURL.appendingPathComponent(messageThread.identifier).appendingPathComponent("messages").appendingPathExtension("json")
+        let requestURL = baseURL.appendingPathComponent(messageThread.identifier).appendingPathComponent("messages").appendingPathExtension("json")
         var request = URLRequest(url: requestURL)
         request.httpMethod = HTTPMethod.post.rawValue
         
@@ -116,5 +125,6 @@ class MessageThreadController {
             
         }.resume()
     }
+
 
 }
