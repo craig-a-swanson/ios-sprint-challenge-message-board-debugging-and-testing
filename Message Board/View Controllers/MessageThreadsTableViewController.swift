@@ -8,8 +8,15 @@
 
 import UIKit
 
-class MessageThreadsTableViewController: UITableViewController {
+class MessageThreadsTableViewController: UITableViewController, UITextFieldDelegate {
 
+    // MARK: - Properties
+    
+    let messageThreadController = MessageThreadController()
+    
+    @IBOutlet weak var threadTitleTextField: UITextField!
+    
+    // MARK: - Table View Lifecycle
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -50,6 +57,20 @@ class MessageThreadsTableViewController: UITableViewController {
         return cell
     }
     
+    // Implemented swipe to delete
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            
+            let messageThread = messageThreadController.messageThreads[indexPath.row]
+            messageThreadController.deleteEntryFromServer(messageThread)
+            messageThreadController.fetchMessageThreads {
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+        }
+    }
+    
     // MARK: - Navigation
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -61,10 +82,4 @@ class MessageThreadsTableViewController: UITableViewController {
             destinationVC.messageThread = messageThreadController.messageThreads[indexPath.row]
         }
     }
-    
-    // MARK: - Properties
-    
-    let messageThreadController = MessageThreadController()
-    
-    @IBOutlet weak var threadTitleTextField: UITextField!
 }

@@ -10,9 +10,17 @@ import Foundation
 
 class MessageThreadController {
     
+    // MARK: - Properties
+
+    // FIXED: Removed static let
+    let baseURL = URL(string: "https://kidsfly-43b49.firebaseio.com/")!
+    var messageThreads: [MessageThread] = []
+    
+    
+    // MARK: - Fetch from Server
     func fetchMessageThreads(completion: @escaping () -> Void) {
         
-        let requestURL = MessageThreadController.baseURL.appendingPathExtension("json")
+        let requestURL = baseURL.appendingPathExtension("json")
         
         // This if statement and the code inside it is used for UI Testing. Disregard this when debugging.
         if isUITesting {
@@ -28,19 +36,27 @@ class MessageThreadController {
                 return
             }
             
-            guard let data = data else { NSLog("No data returned from data task"); completion(); return }
+            guard let data = data else {
+                NSLog("No data returned from data task")
+                completion(); return }
             
             do {
-                self.messageThreads = try JSONDecoder().decode([MessageThread].self, from: data)
+                
+                // FIXED: changed decoding format into a dictionary and then pulled out the values (MessageThreads)
+                let messages = try JSONDecoder().decode([String : MessageThread].self, from: data).map() { $0.value }
+                self.messageThreads = messages
             } catch {
                 self.messageThreads = []
                 NSLog("Error decoding message threads from JSON data: \(error)")
             }
             
             completion()
+            
+            // FIXED: added .resume() command
         }.resume()
     }
     
+    // MARK: - Create Message Thread
     func createMessageThread(with title: String, completion: @escaping () -> Void) {
         
         // This if statement and the code inside it is used for UI Testing. Disregard this when debugging.
@@ -51,7 +67,7 @@ class MessageThreadController {
         
         let thread = MessageThread(title: title)
         
-        let requestURL = MessageThreadController.baseURL.appendingPathComponent(thread.identifier).appendingPathExtension("json")
+        let requestURL = baseURL.appendingPathComponent(thread.identifier).appendingPathExtension("json")
         var request = URLRequest(url: requestURL)
         request.httpMethod = HTTPMethod.put.rawValue
         
@@ -59,6 +75,9 @@ class MessageThreadController {
             request.httpBody = try JSONEncoder().encode(thread)
         } catch {
             NSLog("Error encoding thread to JSON: \(error)")
+            
+            // FIXED: add return
+            return
         }
         
         URLSession.shared.dataTask(with: request) { (data, _, error) in
@@ -72,9 +91,10 @@ class MessageThreadController {
             self.messageThreads.append(thread)
             completion()
             
-        }
+        }.resume()
     }
     
+    // MARK: - New Message in Thread
     func createMessage(in messageThread: MessageThread, withText text: String, sender: String, completion: @escaping () -> Void) {
         
         // This if statement and the code inside it is used for UI Testing. Disregard this when debugging.
@@ -88,7 +108,7 @@ class MessageThreadController {
         let message = MessageThread.Message(text: text, sender: sender)
         messageThreads[index].messages.append(message)
         
-        let requestURL = MessageThreadController.baseURL.appendingPathComponent(messageThread.identifier).appendingPathComponent("messages").appendingPathExtension("json")
+        let requestURL = baseURL.appendingPathComponent(messageThread.identifier).appendingPathComponent("messages").appendingPathExtension("json")
         var request = URLRequest(url: requestURL)
         request.httpMethod = HTTPMethod.post.rawValue
         
@@ -111,6 +131,24 @@ class MessageThreadController {
         }.resume()
     }
     
-    static let baseURL = URL(string: "https://lambda-message-board.firebaseio.com/")!
-    var messageThreads: [MessageThread] = []
+    // MARK: - Delete from Server
+    func deleteEntryFromServer(_ messageThread: MessageThread, completion: @escaping (Error?) -> Void = {_ in }) {
+        let identifier = messageThread.identifier
+        
+        let requestURL = baseURL.appendingPathComponent(identifier).appendingPathExtension("json")
+        var request = URLRequest(url: requestURL)
+        request.httpMethod = "DELETE"
+        
+        URLSession.shared.dataTask(with: request) { _, _, error in
+            guard error == nil else {
+                print("Error deleting task: \(error!)")
+                completion(error)
+                return
+            }
+            completion(nil)
+        }.resume()
+        
+    }
+
+
 }
