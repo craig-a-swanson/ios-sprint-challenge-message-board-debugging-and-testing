@@ -57,6 +57,20 @@ class MessageThreadsTableViewController: UITableViewController, UITextFieldDeleg
         return cell
     }
     
+    // Implemented swipe to delete
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            
+            let messageThread = messageThreadController.messageThreads[indexPath.row]
+            messageThreadController.deleteEntryFromServer(messageThread)
+            messageThreadController.fetchMessageThreads {
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+        }
+    }
+    
     // MARK: - Navigation
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

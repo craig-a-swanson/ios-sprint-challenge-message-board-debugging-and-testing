@@ -14,8 +14,11 @@ class MessageDetailViewController: UIViewController {
     
     @IBAction func sendMessage(_ sender: Any) {
         
+        // FIXED: will not save if senderName or messageText (or both) are empty.
         guard let senderName = senderNameTextField.text,
+            !senderName.isEmpty,
             let messageText = messageTextView.text,
+            !messageText.isEmpty,
             let messageThread = messageThread else { return }
         
         messageThreadController?.createMessage(in: messageThread, withText: messageText, sender: senderName, completion: {
@@ -34,4 +37,5 @@ class MessageDetailViewController: UIViewController {
 
     @IBOutlet weak var senderNameTextField: UITextField!
     @IBOutlet weak var messageTextView: UITextView!
+    
 }

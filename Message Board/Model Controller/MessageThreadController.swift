@@ -130,6 +130,25 @@ class MessageThreadController {
             
         }.resume()
     }
+    
+    // MARK: - Delete from Server
+    func deleteEntryFromServer(_ messageThread: MessageThread, completion: @escaping (Error?) -> Void = {_ in }) {
+        let identifier = messageThread.identifier
+        
+        let requestURL = baseURL.appendingPathComponent(identifier).appendingPathExtension("json")
+        var request = URLRequest(url: requestURL)
+        request.httpMethod = "DELETE"
+        
+        URLSession.shared.dataTask(with: request) { _, _, error in
+            guard error == nil else {
+                print("Error deleting task: \(error!)")
+                completion(error)
+                return
+            }
+            completion(nil)
+        }.resume()
+        
+    }
 
 
 }
